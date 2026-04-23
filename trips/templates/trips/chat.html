@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🇵🇰 Pakistan Travel AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #eef5f0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        .chat-container {
+            max-width: 800px;
+            margin: 1.5rem auto;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 12px 30px rgba(0,40,20,0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 92vh;
+            border: 1px solid #c8ddce;
+        }
+        .chat-header {
+            padding: 1.2rem 1.8rem;
+            background: linear-gradient(145deg, #0b4f1f, #1a6e30);
+            color: white;
+            border-bottom: 3px solid #f9c74f;
+        }
+        .chat-header h3 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+        .chat-header small {
+            opacity: 0.85;
+            font-size: 0.8rem;
+        }
+        .new-trip-btn {
+            background: rgba(255,255,240,0.2);
+            border: 1px solid #f9e79f;
+            color: white;
+            padding: 0.4rem 1.3rem;
+            border-radius: 30px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .new-trip-btn:hover {
+            background: #f9e79f;
+            color: #0b3b1f;
+            border-color: #f1c40f;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem 1.5rem 0.5rem;
+            background: #fbfefc;
+        }
+        .message {
+            margin-bottom: 1.2rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .message-user {
+            align-items: flex-end;
+        }
+        .message-bot {
+            align-items: flex-start;
+        }
+        .bubble {
+            max-width: 85%;
+            padding: 0.8rem 1.3rem;
+            border-radius: 22px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        .bubble-user {
+            background: #0b5e2e;
+            color: white;
+            border-bottom-right-radius: 6px;
+        }
+        .bubble-bot {
+            background: #f0f7f2;
+            border: 1px solid #cde0d3;
+            border-bottom-left-radius: 6px;
+            color: #1c2e22;
+        }
+        .bubble-status {
+            background: #e7f0e9;
+            color: #0b4f1f;
+            font-style: italic;
+            padding: 0.4rem 1.2rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            border-left: 4px solid #0b5e2e;
+        }
+        .draft-box {
+            background: #f9fffb;
+            border-left: 6px solid #0b5e2e;
+            padding: 1.2rem 1.2rem;
+            border-radius: 16px;
+            margin: 0.8rem 0;
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+            box-shadow: inset 0 1px 4px rgba(0,0,0,0.02);
+        }
+        .chat-footer {
+            padding: 1rem 1.5rem 1.5rem;
+            background: white;
+            border-top: 1px solid #d2e3d8;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        .input-group input {
+            flex: 1;
+            border-radius: 50px !important;
+            padding: 0.8rem 1.4rem;
+            border: 1.5px solid #bdd0c2;
+            background: white;
+            font-size: 1rem;
+        }
+        .input-group input:focus {
+            border-color: #0b5e2e;
+            box-shadow: 0 0 0 3px rgba(11,94,46,0.1);
+            outline: none;
+        }
+        .input-group button {
+            border-radius: 50px !important;
+            padding: 0.8rem 1.8rem;
+            background: #0b5e2e;
+            border: none;
+            color: white;
+            font-weight: 600;
+        }
+        .input-group button:hover {
+            background: #1a7a3e;
+        }
+        .city-suggestions {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: #3a5c45;
+        }
+        .city-tag {
+            display: inline-block;
+            background: #e2f0e6;
+            padding: 0.2rem 1rem;
+            border-radius: 30px;
+            margin: 0.2rem 0.3rem;
+            color: #0b3b1f;
+            border: 1px solid #b7d3c0;
+            cursor: pointer;
+        }
+        .city-tag:hover {
+            background: #c5e0cf;
+        }
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            margin: 0.3rem 0;
+        }
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            background: #6f9e7c;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+            animation: bounce 1.3s infinite;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-7px); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-header d-flex justify-content-between align-items-center">
+        <div>
+            <h3>🇵🇰 Pakistan Travel AI</h3>
+            <small>Ask about Hunza, Skardu, Lahore, Karachi…</small>
+        </div>
+        <button id="newTripBtn" class="new-trip-btn">+ New Trip</button>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+        <!-- All messages are dynamically added via WebSocket -->
+    </div>
+
+    <div class="chat-footer">
+        <form id="chatForm">
+            <div class="input-group">
+                <input type="text" id="messageInput" class="form-control" placeholder="Type your message..." autocomplete="off" autofocus>
+                <button type="submit">Send</button>
+            </div>
+        </form>
+        <div class="city-suggestions">
+            <span class="city-tag" data-city="Hunza">Hunza</span>
+            <span class="city-tag" data-city="Skardu">Skardu</span>
+            <span class="city-tag" data-city="Naran">Naran</span>
+            <span class="city-tag" data-city="Swat">Swat</span>
+            <span class="city-tag" data-city="Murree">Murree</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        let socket = null;
+        let threadId = null;
+        let isConnected = false;
+        let reconnectAttempts = 0;
+        const MAX_RECONNECT = 5;
+
+        const messagesDiv = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const chatForm = document.getElementById('chatForm');
+
+        function addMessage(sender, text, isStatus = false) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message message-${sender}`;
+            const bubble = document.createElement('div');
+            bubble.className = `bubble bubble-${sender}`;
+            if (isStatus) bubble.className = 'bubble bubble-status';
+            bubble.innerHTML = text.replace(/\n/g, '<br>');
+            msgDiv.appendChild(bubble);
+            messagesDiv.appendChild(msgDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function displayDraft(draftText) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message message-bot';
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble bubble-bot';
+            bubble.innerHTML = `<strong>📋 Your Itinerary:</strong><div class="draft-box">${draftText.replace(/\n/g, '<br>')}</div>`;
+            msgDiv.appendChild(bubble);
+            messagesDiv.appendChild(msgDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function addTypingIndicator() {
+            const ind = document.createElement('div');
+            ind.className = 'typing-indicator';
+            ind.id = 'typingIndicator';
+            ind.innerHTML = '<span></span><span></span><span></span>';
+            messagesDiv.appendChild(ind);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            document.getElementById('typingIndicator')?.remove();
+        }
+
+        function connectWebSocket() {
+            const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/chat/`;
+            socket = new WebSocket(wsUrl);
+
+            socket.onopen = () => {
+                console.log('[WS] Connected');
+                isConnected = true;
+                reconnectAttempts = 0;
+                // No extra welcome message here – server will send the first question
+            };
+
+            socket.onmessage = (event) => {
+                removeTypingIndicator();
+                const data = JSON.parse(event.data);
+                console.log('[WS] Received:', data);
+
+                if (data.type === 'question') {
+                    addMessage('bot', data.content);
+                    if (data.thread_id) threadId = data.thread_id;
+                } else if (data.type === 'status') {
+                    addMessage('bot', data.content, true);
+                } else if (data.type === 'draft') {
+                    displayDraft(data.content);
+                } else if (data.type === 'final') {
+                    addMessage('bot', '✅ Your trip has been finalized. Enjoy!');
+                    displayDraft(data.content);
+                    threadId = null;
+                } else if (data.type === 'error') {
+                    addMessage('bot', `❌ ${data.content}`, true);
+                }
+            };
+
+            socket.onclose = () => {
+                isConnected = false;
+                removeTypingIndicator();
+                if (reconnectAttempts < MAX_RECONNECT) {
+                    reconnectAttempts++;
+                    addMessage('bot', '⚠️ Reconnecting...', true);
+                    setTimeout(connectWebSocket, 2000);
+                } else {
+                    addMessage('bot', '❌ Connection lost. Please refresh.', true);
+                }
+            };
+
+            socket.onerror = (e) => console.error('[WS] Error', e);
+        }
+
+        function sendMessage(text) {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                addMessage('bot', '❌ Not connected.', true);
+                return;
+            }
+            if (!threadId) threadId = 'unknown';
+            socket.send(JSON.stringify({ message: text, thread_id: threadId }));
+            addMessage('user', text);
+            addTypingIndicator();
+        }
+
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = messageInput.value.trim();
+            if (!text) return;
+            messageInput.value = '';
+            sendMessage(text);
+        });
+
+        document.getElementById('newTripBtn').addEventListener('click', () => {
+            if (socket) socket.close();
+            messagesDiv.innerHTML = '';
+            threadId = null;
+            connectWebSocket();
+        });
+
+        document.querySelectorAll('.city-tag').forEach(tag => {
+            tag.addEventListener('click', () => {
+                const city = tag.dataset.city;
+                messageInput.value = `I want to visit ${city}`;
+                messageInput.focus();
+            });
+        });
+
+        connectWebSocket();
+        messageInput.focus();
+    })();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
